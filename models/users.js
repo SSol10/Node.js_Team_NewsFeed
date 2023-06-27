@@ -3,6 +3,7 @@ const { Model } = require("sequelize");
 const unique_validation = require("../utils/unique_validation");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+
 module.exports = (sequelize, DataTypes) => {
   class Users extends Model {
     /**

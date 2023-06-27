@@ -3,4 +3,5 @@ const email_validation_check = (email)=>{
     return email_validation.test(email);
 }
 
+
 module.exports = email_validation_check;
