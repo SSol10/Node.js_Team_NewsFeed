@@ -3,6 +3,7 @@ const pw_validation_check = (password) => {
     return pw_validation.test(password);
   };
 
+  
 module.exports = pw_validation_check;
 
   // /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,15}$/

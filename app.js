@@ -5,6 +5,7 @@ const indexRouter = require("./routes/index.js");
 const cookieParser = require("cookie-parser");
 
 
+
 app.use([express.json(),cookieParser()]);
 app.use("/api",indexRouter);
 
