@@ -14,6 +14,7 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
       where: { EMAIL },
       attributes: userFieldNamesArray.concat("REFRESH_TOKEN"), //배열안에 REFRESH_TOKEN과 함께, 가져오고싶은 필드이름을 지정 (push는 길이반환 , concat은 배열반환)
     }); //
+    
     if (!user) {
       res.clearCookie("Authorization");
       return res.status(403).json({ message: "로그인이 필요한 기능입니다" });
@@ -27,3 +28,4 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
     return res.status(403).json({ message: "로그인에 실패하였습니다" });
   }
 };
+

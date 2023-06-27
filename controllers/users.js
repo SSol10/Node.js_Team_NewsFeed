@@ -32,3 +32,4 @@ module.exports = async (req, res) => {
     return res.status(500).json({ message: "회원가입에 실패하였습니다." });
   }
 };
+

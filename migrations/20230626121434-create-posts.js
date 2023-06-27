@@ -10,6 +10,7 @@ module.exports = {
         unique: true,
         type: Sequelize.INTEGER,
       },
+      
       USER_ID: {
         allowNull: false,
         type: Sequelize.INTEGER,

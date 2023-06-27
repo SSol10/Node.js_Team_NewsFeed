@@ -46,6 +46,7 @@ module.exports = {
         defaultValue: Sequelize.fn("now"),
       },
     });
+    
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("Users");
