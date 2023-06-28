@@ -7,12 +7,12 @@ const refreshTokenExpiresIn = "14d";
 
 module.exports = async (req, res) => {
   try {
-    const { EMAIL, PASSWORD } = req.body;
+    const { email, password } = req.body;
     const user = await Users.findOne({
-      where: { EMAIL },
-      attributes: ["PASSWORD","USER_ID"],
+      where: { email },
+      attributes: ["password","userId"],
     });
-    if (!user.PASSWORD||!user) {
+    if (!user.password||!user) {
       //패스워드가 존재하지 않는경우 즉, email이 유효하지 않은경우
       return res
         .status(412)
@@ -20,14 +20,14 @@ module.exports = async (req, res) => {
     } else {
       //패스워드가 존재하는경우 즉, email이 유효한경우
       //입력받은 패스워드와 비교
-      const isValidPassword = bcrypt.compareSync(PASSWORD, user.PASSWORD);
+      const isValidPassword = bcrypt.compareSync(password, user.password);
       if (!isValidPassword) {
         //bcrypt로 비교한 암호가 다른경우
         return res
           .status(412)
           .json({ message: "이메일 또는 패스워드를 확인해주세요" });
       }
-      const accessToken = jwt.sign({ EMAIL }, tokenKey, {
+      const accessToken = jwt.sign({ email }, tokenKey, {
         expiresIn: accessTokenExpiresIn,
       });
       const refreshToken = jwt.sign({}, tokenKey, {

@@ -146,9 +146,3 @@ dist
 
 #config파일을 깃에 올리지 않도록 지정
 config/
-
-
-#잠시 수정
-controllers/
-middleware/
-routes/
