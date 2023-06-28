@@ -13,39 +13,39 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.hasMany(models.Posts, {
-        sourceKey: "USER_ID",
-        foreignKey: "USER_ID",
+        sourceKey: "userId",
+        foreignKey: "userId",
       });
       this.hasMany(models.Comments, {
-        sourceKey: "USER_ID",
-        foreignKey: "USER_ID",
+        sourceKey: "userId",
+        foreignKey: "userId",
       });
       this.hasMany(models.Likes, {
-        sourceKey: "USER_ID",
-        foreignKey: "USER_ID",
+        sourceKey: "userId",
+        foreignKey: "userId",
       });
     }
   }
   Users.init(
     {
-      USER_ID: {
+      userId: {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
         unique: true,
         type: DataTypes.INTEGER,
       },
-      EMAIL: {
+      email: {
         allowNull: false,
         unique: true,
         type: DataTypes.STRING,
         validate: {
           isUnique: (value, next) => {
-            unique_validation.call(Users,"EMAIL", 100, value, next);
+            unique_validation.call(Users,"email", 100, value, next);
           }, //email중첩 100
         },
       },
-      PASSWORD: {
+      password: {
         allowNull: false,
         type: DataTypes.STRING,
         set(value) {
@@ -53,16 +53,16 @@ module.exports = (sequelize, DataTypes) => {
           //만약 데이터를 저장하기 이전에 로직을 수행하고싶으면 beforeCreate사용
           const hashedPassword = bcrypt.hashSync(value, saltRounds);
           console.log(hashedPassword) //set함수를 호출한 쪽에서 error핸들링
-          this.setDataValue("PASSWORD", hashedPassword);
+          this.setDataValue("password", hashedPassword);
         },
       },
-      NICKNAME: {
+      nickname: {
         allowNull: false,
         unique: true,
         type: DataTypes.STRING,
         validate: {
           isUnique: (value, next) => {
-            unique_validation.call(Users,"NICKNAME", 101, value, next);
+            unique_validation.call(Users,"nickname", 101, value, next);
           },
           // isUnique: function (nickname, next){
           //   USERS.findOne(({NICKNAME:nickname})).then(user=>{
@@ -76,14 +76,14 @@ module.exports = (sequelize, DataTypes) => {
           // }
         },
       },
-      NAME: {
+      name: {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      USER_TMI: {
+      TMI: {
         type: DataTypes.STRING,
       },
-      REFRESH_TOKEN: {
+      refreshToken: {
         allowNull: true,
         type: DataTypes.STRING,
       },

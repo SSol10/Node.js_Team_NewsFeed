@@ -3,33 +3,32 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Comments", {
-      COMMENT_ID: {
+      commentId: {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
         unique: true,
         type: Sequelize.INTEGER,
       },
-      USER_ID: {
+      userId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: "Users",
-          key: "user_id",
+          key: "userId",
         },
         onDelete: "CASCADE",
-        
       },
-      POST_ID: {
+      postId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: "Posts",
-          key: "post_id",
+          key: "postId",
         },
         onDelete: "CASCADE",
       },
-      COMMENT_CONTENT: {
+      commentContent: {
         type: Sequelize.STRING,
       },
       createdAt: {

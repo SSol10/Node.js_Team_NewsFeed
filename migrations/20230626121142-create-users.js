@@ -2,37 +2,38 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    //마이그레이션을 등록할 때
     await queryInterface.createTable("Users", {
-      USER_ID: {
+      userId: {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
         unique: true,
         type: Sequelize.INTEGER,
       },
-      EMAIL: {
+      email: {
         allowNull: false,
         unique: true,
         type: Sequelize.STRING,
       },
-      PASSWORD: {
+      password: {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      NICKNAME: {
+      nickname: {
         allowNull: false,
         unique: true,
         type: Sequelize.STRING,
       },
-      NAME: {
+      name: {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      USER_TMI: {
+      TMI: {
         type: Sequelize.STRING,
       },
-      REFRESH_TOKEN:{
-        allowNull:true,
+      refreshToken: {
+        allowNull: true,
         type: Sequelize.STRING,
       },
       createdAt: {
@@ -46,7 +47,6 @@ module.exports = {
         defaultValue: Sequelize.fn("now"),
       },
     });
-    
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("Users");

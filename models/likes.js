@@ -9,17 +9,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.Users, { 
-        targetKey: 'USER_ID', 
-        foreignKey: 'USER_ID',
+      this.belongsTo(models.Users, {
+        targetKey: "userId",
+        foreignKey: "userId",
       });
-      this.belongsTo(models.Posts, { 
-        targetKey: 'POST_ID', 
-        foreignKey: 'POST_ID',
+      this.belongsTo(models.Posts, {
+        targetKey: "postId",
+        foreignKey: "postId",
       });
-
     }
-    
   }
   Likes.init(
     {
@@ -35,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         references: {
           model: "Users",
-          key: "user_id",
+          key: "userId",
         },
         onDelete: "CASCADE",
       },
@@ -44,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         references: {
           model: "Posts",
-          key: "post_id",
+          key: "postId",
         },
         onDelete: "CASCADE",
       },

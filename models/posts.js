@@ -11,12 +11,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.Users, { 
-        targetKey: 'USER_ID', 
-        foreignKey: 'USER_ID',
+        targetKey: 'userId', 
+        foreignKey: 'userId',
       });
       this.hasMany(models.Comments,{
-        sourceKey:'POST_ID',
-        foreignKey:'POST_ID'
+        sourceKey:'postId',
+        foreignKey:'postId'
       })
 
     }
@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         references: {
           model: "Users",
-          key: "user_id",
+          key: "userId",
         },
         onDelete: "CASCADE",
       },
