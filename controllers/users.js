@@ -23,13 +23,12 @@ module.exports = async (req, res) => {
     await Users.create({ EMAIL, PASSWORD, NICKNAME, NAME, USER_TMI });
     res.status(200).json({ message: "회원가입이 성공적으로 완료되었습니다" });
   } catch (err) {
-    console.log(err);
-    if (err.code === 100) {
+    console.log(err.message);
+    if (err.message === "Validation error: 100") {
       return res.status(412).json({ message: "중첩된 이메일이 존재합니다" });
-    } else if (err.code === 101) {
+    } else if (err.message === "Validation error: 101") {
       return res.status(412).json({ message: "중첩된 닉네임이 존재합니다" });
     }
     return res.status(500).json({ message: "회원가입에 실패하였습니다." });
   }
 };
-
