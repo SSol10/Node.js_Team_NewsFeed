@@ -23,14 +23,14 @@ module.exports = (sequelize, DataTypes) => {
   }
   Posts.init(
     {
-      POST_ID: {
+      postId: {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
         unique: true,
         type: DataTypes.INTEGER,
       },
-      USER_ID: {
+      userId: {
         allowNull: false,
         type: DataTypes.INTEGER,
         references: {
@@ -39,15 +39,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         onDelete: "CASCADE",
       },
-      POST_TITLE: {
+      postTitle: {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      POST_CONTENT: {
+      postContent: {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      VIEW_CONTENT: {
+      viewContent: {
         defaultValue: 0,
         type: DataTypes.INTEGER,
       },

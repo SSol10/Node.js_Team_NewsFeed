@@ -7,7 +7,7 @@ const createComment = async (req, res) => {
   const { postId } = req.params;
   const { userId } = req.locals.user;
 
-  if (!COMMENT_CONTENT) {
+  if (!commentContent) {
     return res.status(412).json({ message: "댓글 내용이 없습니다" });
   }
 
@@ -94,10 +94,12 @@ const deleteComment = async (req, res) => {
       where: { commentId, userId: user.userId },
     });
     if (!deleteCount) {
-      return res.status(403).json({ message: "게시글 삭제 권한이 " });
+      return res.status(403).json({ message: "게시글 삭제 권한이 없습니다" });
     }
   } catch (err) {
-    res.status(400).json({message:"댓글 삭제가 정상적으로 처리되지 않았습니다"})
+    res
+      .status(400)
+      .json({ message: "댓글 삭제가 정상적으로 처리되지 않았습니다" });
   }
 };
 
