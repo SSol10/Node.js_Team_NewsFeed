@@ -29,3 +29,4 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
   }
 };
 
+module.exports = authMiddleware;
