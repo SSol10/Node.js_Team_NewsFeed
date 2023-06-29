@@ -51,20 +51,21 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0,
         type: DataTypes.INTEGER,
       },
-      createdAt: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
-      updatedAt: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
+    //   createdAt: {
+    //     allowNull: false,
+    //     type: DataTypes.DATE,
+    //     defaultValue: DataTypes.NOW,
+    //   },
+    //   updatedAt: {
+    //     allowNull: false,
+    //     type: DataTypes.DATE,
+    //     defaultValue: DataTypes.NOW,
+    //   },
     },
     {
       sequelize,
       modelName: "Posts",
+      timestamps: true
     }
   );
   return Posts;
