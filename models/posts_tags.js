@@ -11,12 +11,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.HashTags,{
-        targetKey:tagId,
-        foreignKey:tagId
+        targetKey:'tagId',
+        foreignKey:'tagId'
       });
       this.belongsTo(models.Posts,{
-        targetKey:postId,
-        foreignKey:postId
+        targetKey:'postId',
+        foreignKey:'postId'
       })
     }
   }
@@ -49,12 +49,12 @@ module.exports = (sequelize, DataTypes) => {
           },
           createdAt: {
             allowNull: false,
-            type: Sequelize.DATE,
+            type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
           },
           updatedAt: {
             allowNull: false,
-            type: Sequelize.DATE,
+            type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
           },
     },

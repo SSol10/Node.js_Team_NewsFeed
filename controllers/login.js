@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
       const refreshToken = jwt.sign({}, tokenKey, {
         expiresIn: refreshTokenExpiresIn,
       });
-      user.REFRESH_TOKEN = refreshToken;
+      user.refreshToken = refreshToken;
       console.log(refreshToken)
       await user.save();
       res.cookie("Authorization", `Bearer ${accessToken}`);

@@ -1,4 +1,7 @@
 "use strict";
+
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -8,11 +11,11 @@ module.exports = {
         autoIncrement: true,
         allowNull: false,
         unique: true,
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
       },
       postId: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
           model: "Posts",
           key: "postId",
@@ -21,7 +24,7 @@ module.exports = {
       },
       tagId: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
           model: "HashTags",
           key: "tagId",
@@ -30,13 +33,13 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn("now"),
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
       },
     });
   },
