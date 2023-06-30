@@ -5,6 +5,26 @@ const { Posts } = require("../models");
 
 // router.use(authMiddleware);
 
+//라우터를 쓰고 /posts로 모든 게시글을 조회한다
+router.get("/posts", ansync(req,res) => {
+    const posts = await posts.findall({
+        attributes: ['commentId', 'userId', 'postId', 'commentContent', 'viewContent'],
+        // posts.findall 통해 모든 게시글을 찾겠다 그 후 attridutes 사용
+
+        order: [['postId', 'viewContent']],
+        // order을 통해 데이터를 내림차순으로 정렬, 혹은 오름차순으로 정렬
+    });
+    if (!posts.length) {
+        return res.status(400).json({
+          message: '게시글 조회에 실패하셨습니다.',
+       });
+      } else {
+        res.status(200).send(posts);
+      }
+   
+      res.status(200).json({data: posts});
+    });
+
 router
     .route("/")
     .post(
