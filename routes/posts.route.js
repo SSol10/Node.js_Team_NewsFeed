@@ -4,10 +4,11 @@ const { Posts, HashTags, Posts_Tags } = require("../models");
 const authMiddleware = require("../middleware/auth_middleware");
 const db = require("../models");
 const { Op } = require("sequelize");
+const memberchecker = require("../middleware/memberChecker");
 
 router
     .route("/")
-    .get(async (req, res) => {
+    .get(memberchecker, async (req, res) => {
         try {
             const posts = await posts.findAll({
                 attributes: [
@@ -43,12 +44,29 @@ router
                         },
                     });
 
+                    let userHasClicked = null;
+                    if (userId) {
+                        userHasClicked = await Likes.findOne({
+                            where: {
+                                userId: Number(userId),
+                                postId: Number(post.postId),
+                            },
+                        });
+                    }
+
+                    if (userHasClicked) {
+                        userHasClicked = true;
+                    } else {
+                        userHasClicked = false;
+                    }
+
                     return {
                         postId: Number(post.postId),
                         userId: post.userId,
                         nickname: post.User.nickname,
                         postTitle: post.postTitle,
                         likesCount: likesCount,
+                        clicked: userHasClicked,
                         createdAt: post.createdAt,
                         updatedAt: post.updateAt,
                     };
@@ -59,6 +77,7 @@ router
                 posts: postsData,
             });
         } catch (err) {
+            console.error(`GET /api/posts error message: ${err}`);
             return res.status(500).json({ message: "Internal Server Error" });
         }
     })
@@ -78,7 +97,6 @@ router
                 }
                 return hashtag.trim().split(",");
             };
-
 
             if (!postTitle || !postContent) {
                 return res
@@ -167,6 +185,87 @@ router
 
 router
     .route("/:postId")
+    .get(memberchecker, async (req, res) => {
+        const { postId } = req.params;
+        const { userId } = res.locals.user;
+
+        if (!postId) {
+            return res
+                .status(400)
+                .json({ message: "데이터 형식이 올바르지 않습니다." });
+        }
+        try {
+            //
+            const result = await Posts.findByPk(Number(postId), {
+                include: {
+                    model: Users,
+                    attributes: ["nickname"],
+                },
+                raw: true,
+                nest: true,
+            });
+            if (result) {
+                // 게시글을 조회하면 조회수 증가
+                // Promise 반환해서 순서가 안지켜지는 문제가 있고 response 할 때 1을 더해서 반환하도록 처리했음
+                // 1을 더하지 않아도 되는 방법은 무엇이 있을지 생각해보기
+                // 추가 사항: update 말고 이렇게 해도 될 것 같음, await Posts.increment({ viewCount: 1}, { where: { postId: Number(id) }})
+                await Posts.update(
+                    { viewCount: Number(result.viewCount) + 1 },
+                    {
+                        where: {
+                            postId: Number(postId),
+                        },
+                    }
+                );
+                // await Likes.count() 이 방법도 있음
+                // const { count, rows } = await Likes.findAndCountAll({
+                //     where: {
+                //         postId: Number(postId),
+                //     },
+                // });
+                const likesCount = await Likes.count({
+                    where: {
+                        postId: Number(postId),
+                    },
+                });
+
+                let userHasClicked = null;
+                if (userId) {
+                    userHasClicked = await Likes.findOne({
+                        where: {
+                            [Op.and]: [
+                                { userId: Number(userId) },
+                                { postId: Number(postId) },
+                            ],
+                        },
+                    });
+                }
+
+                if (!userHasClicked) userHasClicked = false;
+                else userHasClicked = true;
+
+                return res.status(200).json({
+                    result: {
+                        title: result.postTitle,
+                        nickname: result.User.nickname,
+                        content: result.postContent,
+                        viewCount: Number(result.viewCount) + 1,
+                        likesCount: Number(likesCount),
+                        clicked: userHasClicked,
+                        createdAt: result.createdAt,
+                        updatedAt: result.updatedAt,
+                    },
+                });
+            } else {
+                return res
+                    .status(400)
+                    .json({ message: "게시글 조회에 실패하였습니다." });
+            }
+        } catch (err) {
+            console.error(`GET /api/posts/:id Error Message: ${err}`);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+    })
     .delete(
         async (req, res, next) => {
             await authMiddleware(["userId"], req, res, next);
@@ -226,49 +325,66 @@ router
             }
         }
     )
-
-
-router.route("/:postId").put(async (req,res,next)=>{
-        await authMiddleware([],req,res,next)
-    },async (req,res) => {
-        try{
-            const {postId} = req.params;
-            const {postTitle,postContent} = req.body;
-            const hashTags = postContent.match(/#[^\s#]*/g);
-            const post = await Posts.findByPk(Number(postId))
-            if(!post){
-                return res.status(412).json({message:"게시글을 찾을 수 없습니다."})
-            }
-            db.sequelize.transaction(async (transaction)=>{
-                await post.update({postTitle,postContent},{transaction})
-                await Posts_Tags.destroy({ where:{postId}, transaction})
-                if(hashTags){ //db에 저장된 해시태그도, 수정된 해시태그도 없을때
-        
-                    const bulkHashTag = hashTags.map((tag)=>{
-                        return {tagContent:tag}
-                    })
-                    await HashTags.bulkCreate(bulkHashTag,{ignoreDuplicates:true,transaction})
-        
-                    const tagFind =await HashTags.findAll({ //db에 저장된 해시태그 불러오기
-                        where:{
-                            tagContent:
-                            {[Op.or]:hashTags}
-                        },
-                        attributes:["tagId"],
-                        transaction
-                    })//bulkcreate를 한 후 수행하는게 효율적
-                    await Posts_Tags.bulkCreate(tagFind.map(tag=>{
-                        return {postId,tagId:tag.tagId}
-                    }),{transaction})
-                    return res.status(200).json({message: "정상적으로 수정되었습니다"})
+    .put(
+        async (req, res, next) => {
+            await authMiddleware([], req, res, next);
+        },
+        async (req, res) => {
+            try {
+                const { postId } = req.params;
+                const { postTitle, postContent } = req.body;
+                const hashTags = postContent.match(/#[^\s#]*/g);
+                const post = await Posts.findByPk(Number(postId));
+                if (!post) {
+                    return res
+                        .status(412)
+                        .json({ message: "게시글을 찾을 수 없습니다." });
                 }
-            })
+                db.sequelize.transaction(async (transaction) => {
+                    await post.update(
+                        { postTitle, postContent },
+                        { transaction }
+                    );
+                    await Posts_Tags.destroy({
+                        where: { postId },
+                        transaction,
+                    });
+                    if (hashTags) {
+                        //db에 저장된 해시태그도, 수정된 해시태그도 없을때
 
-        }catch(err){
-            console.log(err)
-            return res.status(400).json({message:"수정이 정상적으로 완료되지 않았습니다."})
+                        const bulkHashTag = hashTags.map((tag) => {
+                            return { tagContent: tag };
+                        });
+                        await HashTags.bulkCreate(bulkHashTag, {
+                            ignoreDuplicates: true,
+                            transaction,
+                        });
+
+                        const tagFind = await HashTags.findAll({
+                            //db에 저장된 해시태그 불러오기
+                            where: {
+                                tagContent: { [Op.or]: hashTags },
+                            },
+                            attributes: ["tagId"],
+                            transaction,
+                        }); //bulkcreate를 한 후 수행하는게 효율적
+                        await Posts_Tags.bulkCreate(
+                            tagFind.map((tag) => {
+                                return { postId, tagId: tag.tagId };
+                            }),
+                            { transaction }
+                        );
+                        return res
+                            .status(200)
+                            .json({ message: "정상적으로 수정되었습니다" });
+                    }
+                });
+            } catch (err) {
+                console.log(err);
+                return res.status(400).json({
+                    message: "수정이 정상적으로 완료되지 않았습니다.",
+                });
+            }
         }
-
-    });
+    );
 module.exports = router;
-
