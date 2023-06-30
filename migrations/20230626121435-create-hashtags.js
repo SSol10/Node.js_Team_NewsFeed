@@ -11,6 +11,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       tagContent: {
+        unique:true,
         allowNull: false,
         type: Sequelize.STRING,
       },
@@ -25,6 +26,7 @@ module.exports = {
         defaultValue: Sequelize.fn("now"),
       },
     });
+
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("HashTags");

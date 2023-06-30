@@ -28,7 +28,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      viewContent: {
+      viewCount: {
         defaultValue: 0,
         type: Sequelize.INTEGER,
       },
