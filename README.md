@@ -21,6 +21,10 @@
 
 # 프로젝트 기능구현
 
+## API 명세서
+
+![SNS_(1)](https://github.com/SSol10/Node.js_Team_NewsFeed/assets/130738808/2d4a9305-0b44-4b71-92e5-1c95b5c5b107)
+
 
 
 
