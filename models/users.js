@@ -64,16 +64,7 @@ module.exports = (sequelize, DataTypes) => {
           isUnique: (value, next) => {
             unique_validation.call(Users,"nickname", 101, value, next);
           },
-          // isUnique: function (nickname, next){
-          //   USERS.findOne(({NICKNAME:nickname})).then(user=>{
-          //     if(user){
-          //       throw new Error({code:101})
-          //     }
-          //     next();
-          //   }).catch(err=>{
-          //     return next(err);
-          //   })
-          // }
+
         },
       },
       name: {
