@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { Posts, HashTags, Posts_Tags,Op } = require("../models");
+const { Posts, HashTags, Posts_Tags } = require("../models");
 const authMiddleware = require("../middleware/auth_middleware");
 const db = require("../models");
+const { Op } = require("sequelize");
 
 router
     .route("/")
