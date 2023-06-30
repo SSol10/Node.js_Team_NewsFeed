@@ -19,7 +19,6 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
       res.clearCookie("Authorization");
       return res.status(403).json({ message: "로그인이 필요한 기능입니다" });
     }
-    console.log(user)
     //리프레시토큰으로 인증기간이 맞는지 확인
     jwt.verify(user.refreshToken, tokenKey);
     res.locals.user = user;
