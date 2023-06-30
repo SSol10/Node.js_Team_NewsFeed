@@ -104,15 +104,15 @@ router
     );
 
 router
-    .route("/:id")
+    .route("/:postId")
     .delete(async (req,res,next)=>{
         await authMiddleware(["userId"],req,res,next)
     },async (req, res) => {
-        const { id } = req.params;
+        const { postId } = req.params;
         const {userId}= res.locals.user;
         // const { nickname } = res.locals.user;
 
-        if (!id) {
+        if (!postId) {
             res.status(400).json({
                 message: "데이터 형식이 올바르지 않습니다.",
             });
@@ -137,7 +137,7 @@ router
 
                 const postDeletedCount = await Posts.destroy({
                     where: {
-                        postId: Number(id),
+                        postId: Number(postId),
                         userId
                     },
                     force: true
@@ -162,4 +162,35 @@ router
         }
     });
 
+    //수정시 고려사항: 게시글의 해시태그가 달라졌을때를 고려한다.
+    //1. 게시글의 해시태그를 분리해서 저장한다.
+    //2. posts_tags테이블에서 해당 게시글에 저장된 태그들을 불러온다.
+    //3. 만약 해시태그가 기존에 있던것과 일치하면 그대로 나두며,
+    //4. 만약 해시태그가 기존에 있던것과 일치하지 않고 달라졌다면
+    //5. 기존의 해시태그를 지우고, 새로운 해시태그 관계를 생성한다.
+    //6. 게시글 수정
+router.put("/:postId",async()=>{
+        await authMiddleware(["userId"],req,res,next)
+    },async () => {
+        const {postId} = req.params;
+        const {postTitle,postContent} = req.body;
+        const {userId} = res.locals.user;
+        const hashTags = postContent.match(/#[^\s#]*/g);
+
+        const dbStoredTag = await Posts.findAll({
+            where:{postId},
+            include:[{ // 해시태그에서 tagContent, tagId를 가져온다
+                model:HashTags,
+                attributes:["tagContent","tagId"],
+                through:{
+                    model:Posts_Tags,
+                    attributes:[]
+                }
+            }]
+        })//수정 전에 저장된 해시태그를 불러온다.
+
+        
+        
+
+    });
 module.exports = router;

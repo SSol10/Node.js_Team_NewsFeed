@@ -33,9 +33,8 @@ const createComment = async (req, res) => {
 
 const getComment = async (req, res) => {
     const { postId } = req.params;
-    let { commentPageNum, commentSize } = req.body;
-    commentPageNum = req.query.commentPageNum ? req.query.commentPageNum : 1;
-    commentSize = req.query.commentSize ? req.query.commentSize : 10;
+    const commentPageNum = req.query.commentPageNum ? req.query.commentPageNum : 1;
+    const commentSize = req.query.commentSize ? req.query.commentSize : 10;
     try {
         const comments = await Comments.findAll({
             where: { postId },
