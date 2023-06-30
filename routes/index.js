@@ -12,7 +12,7 @@ const commentRouter = require("./comments.route.js")
 router.use("/login",loginRouter);  
 router.use("/signup",signupRouter);
 router.use("/posts", postRouter);
-router.use("/posts/:postId/comments",commentRouter)
+router.use("/posts",commentRouter)
 
 //router.use("/post/:postId/comment")
 
