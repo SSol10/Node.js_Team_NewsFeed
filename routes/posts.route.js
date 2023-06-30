@@ -77,8 +77,7 @@ router
                 }
                 return hashtag.trim().split(",");
             };
-            // const { nickname, _id } = res.locals.user;
-            // const { title, content } = req.body;
+
 
             if (!postTitle || !postContent) {
                 return res
@@ -110,8 +109,7 @@ router
                         { transaction }
                     );
                     const postId = post.postId;
-                    //태그를 bulkcreate로 생성한 후 tagId를 반환받는다 그 이후
-                    //bulkcreate를 이용해서 Posts_tags를 생성한다
+
                     const hashTags = await postContent.match(/#[^\s#]*/g); //#과 문자열로 이루어진 배열 반환
 
                     const returnedHashTagArray = await HashTags.bulkCreate(
