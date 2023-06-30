@@ -29,7 +29,15 @@
 ![스크린샷 2023-06-30 183320](https://github.com/SSol10/Node.js_Team_NewsFeed/assets/130738808/e14f907c-16c8-494e-b3e6-b034413fb2a7)
 ![스크린샷 2023-06-30 183339](https://github.com/SSol10/Node.js_Team_NewsFeed/assets/130738808/2c32b57b-2c37-47bc-9799-f8226ed32973)
 
+## 역할분담
 
+## 와이어프레임
+
+![스크린샷 2023-06-26 141440](https://github.com/SSol10/Node.js_Team_NewsFeed/assets/130738808/aa4727ef-956e-48cd-875c-a6c800eda189)
+
+## ERD 설계
+
+![SNS_(1)](https://github.com/SSol10/Node.js_Team_NewsFeed/assets/130738808/8d27714d-ce5f-45f0-9fb3-8ca85a780cdf)
 
 
 
