@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Posts, HashTags, Posts_Tags } = require("../models");
+const { Posts, HashTags, Posts_Tags,Op } = require("../models");
 const authMiddleware = require("../middleware/auth_middleware");
 const db = require("../models");
 
@@ -226,37 +226,47 @@ router
         }
     )
 
-    //수정시 고려사항: 게시글의 해시태그가 달라졌을때를 고려한다.
-    //1. 게시글의 해시태그를 분리해서 저장한다.
-    //2. posts_tags테이블에서 해당 게시글에 저장된 태그들을 불러온다.
-    //3. 만약 해시태그가 기존에 있던것과 일치하면 그대로 나두며,
-    //4. 만약 해시태그가 기존에 있던것과 일치하지 않고 달라졌다면
-    //5. 기존의 해시태그를 지우고, 새로운 해시태그 관계를 생성한다.
-    //6. 게시글 수정
-    .put(
-        async () => {
-            await authMiddleware(["userId"], req, res, next);
-        },
-        async () => {
-            const { postId } = req.params;
-            const { postTitle, postContent } = req.body;
-            const { userId } = res.locals.user;
-            const hashTags = postContent.match(/#[^\s#]*/g);
 
-            const dbStoredTag = await Posts.findAll({
-                where: { postId },
-                include: [
-                    {
-                        // 해시태그에서 tagContent, tagId를 가져온다
-                        model: HashTags,
-                        attributes: ["tagContent", "tagId"],
-                        through: {
-                            model: Posts_Tags,
-                            attributes: [],
+router.route("/:postId").put(async (req,res,next)=>{
+        await authMiddleware([],req,res,next)
+    },async (req,res) => {
+        try{
+            const {postId} = req.params;
+            const {postTitle,postContent} = req.body;
+            const hashTags = postContent.match(/#[^\s#]*/g);
+            const post = await Posts.findByPk(Number(postId))
+            if(!post){
+                return res.status(412).json({message:"게시글을 찾을 수 없습니다."})
+            }
+            db.sequelize.transaction(async (transaction)=>{
+                await post.update({postTitle,postContent},{transaction})
+                await Posts_Tags.destroy({ where:{postId}, transaction})
+                if(hashTags){ //db에 저장된 해시태그도, 수정된 해시태그도 없을때
+        
+                    const bulkHashTag = hashTags.map((tag)=>{
+                        return {tagContent:tag}
+                    })
+                    await HashTags.bulkCreate(bulkHashTag,{ignoreDuplicates:true,transaction})
+        
+                    const tagFind =await HashTags.findAll({ //db에 저장된 해시태그 불러오기
+                        where:{
+                            tagContent:
+                            {[Op.or]:hashTags}
                         },
-                    },
-                ],
-            }); //수정 전에 저장된 해시태그를 불러온다.
+                        attributes:["tagId"],
+                        transaction
+                    })//bulkcreate를 한 후 수행하는게 효율적
+                    await Posts_Tags.bulkCreate(tagFind.map(tag=>{
+                        return {postId,tagId:tag.tagId}
+                    }),{transaction})
+                    return res.status(200).json({message: "정상적으로 수정되었습니다"})
+                }
+            })
+
+        }catch(err){
+            console.log(err)
+            return res.status(400).json({message:"수정이 정상적으로 완료되지 않았습니다."})
         }
-    );
+
+    });
 module.exports = router;
