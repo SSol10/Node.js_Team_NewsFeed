@@ -11,7 +11,7 @@ router.get("/posts", ansync(req,res) => {
         attributes: ['commentId', 'userId', 'postId', 'commentContent', 'viewContent'],
         // posts.findall 통해 모든 게시글을 찾겠다 그 후 attridutes 사용
 
-        order: [['postId', 'viewContent']],
+        order: [['userId', 'desc']],
         // order을 통해 데이터를 내림차순으로 정렬, 혹은 오름차순으로 정렬
     });
     if (!posts.length) {
