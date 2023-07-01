@@ -63,6 +63,15 @@ const getComment = async (req, res) => {
     }
 };
 
+    // 어떤 기능을 구현해야하는지 먼저 주석으로 처리하세요
+
+    // 게시글 수정기능을 작성
+    // 게시글 수정기능을 하려면
+    // 유저로부터 정보를 받아서 게시판의 게시글 수정을 해야한다.
+
+    // 유저로부터 받아올 정보 = title, content ,commentId ,userId
+    // 1.댓글을 db에서 어떻게 찾을지, + 게시글을 찾았다면, 어떻게 수정할지
+
 const modifyComment = async (req, res) => {
     try {
         const { commentId } = req.params;
