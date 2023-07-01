@@ -21,14 +21,14 @@ module.exports = (sequelize, DataTypes) => {
   }
   Likes.init(
     {
-      LIKE_ID: {
+      likeId: {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
         unique: true,
         type: DataTypes.INTEGER,
       },
-      USER_ID: {
+      userId: {
         allowNull: false,
         type: DataTypes.INTEGER,
         references: {
@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         onDelete: "CASCADE",
       },
-      POST_ID: {
+      postId: {
         allowNull: false,
         type: DataTypes.INTEGER,
         references: {
