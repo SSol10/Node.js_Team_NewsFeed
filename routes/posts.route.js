@@ -88,8 +88,8 @@ router
         async (req, res) => {
             // { hashtag: [array] }도 res에 추가하기
             const { postTitle, postContent } = req.body;
-            const { userId } = res.locals.user; // 요거는 테스트용 후에 인증 미들웨어 사용하면 필요없음.
-            //해시태그
+            const { userId } = res.locals.user; 
+
 
             const parseHashtag = (hashtag) => {
                 if (!hashtag) {
@@ -136,11 +136,9 @@ router
                             return { tagContent: hashTag };
                         }),
                         { ignoreDuplicates: true, transaction }
-                    ); // 이미 저장되어있으면 skip 저장 안되었으면 생성 => 한번에 bulkCreate로 해시태그 생성
+                    ); 
                     console.log(returnedHashTagArray);
-                    //해시태그값의 id를 저장할 공간 hashTags{tagId:1},...
-                    //반환받은 해시태그값을 forEach로 돌려서 body로 전달받은 값과 비교
-                    //트랜잭션을
+
                     for (let index = 0; index < hashTags.length; index++) {
                         const tagIdFindNull = returnedHashTagArray[index].tagId;
                         if (tagIdFindNull === null) {
@@ -281,23 +279,6 @@ router
                 });
             } else {
                 try {
-                    // const post = await Posts.findByPk(Number(id));
-
-                    // if (!post) {
-                    //     return res.status(400).json({
-                    //         message: "게시글 조회에 실패하였습니다.",
-                    //     });
-                    // }
-
-                    // // if (nickname !== post.user) {
-                    // //     return res
-                    // //         .status(403)
-                    // //         .json({
-                    // //             errorMessage:
-                    // //                 "게시글을 삭제할 권힌이 존재하지 않습니다.",
-                    // //         });
-                    // // }
-
                     const postDeletedCount = await Posts.destroy({
                         where: {
                             postId: Number(postId),
@@ -325,66 +306,58 @@ router
             }
         }
     )
-    .put(
-        async (req, res, next) => {
-            await authMiddleware([], req, res, next);
-        },
-        async (req, res) => {
-            try {
-                const { postId } = req.params;
-                const { postTitle, postContent } = req.body;
-                const hashTags = postContent.match(/#[^\s#]*/g);
-                const post = await Posts.findByPk(Number(postId));
-                if (!post) {
-                    return res
-                        .status(412)
-                        .json({ message: "게시글을 찾을 수 없습니다." });
-                }
-                db.sequelize.transaction(async (transaction) => {
-                    await post.update(
-                        { postTitle, postContent },
-                        { transaction }
-                    );
-                    await Posts_Tags.destroy({
-                        where: { postId },
-                        transaction,
-                    });
-                    if (hashTags) {
-                        //db에 저장된 해시태그도, 수정된 해시태그도 없을때
-
-                        const bulkHashTag = hashTags.map((tag) => {
-                            return { tagContent: tag };
-                        });
-                        await HashTags.bulkCreate(bulkHashTag, {
-                            ignoreDuplicates: true,
-                            transaction,
-                        });
-
-                        const tagFind = await HashTags.findAll({
-                            //db에 저장된 해시태그 불러오기
-                            where: {
-                                tagContent: { [Op.or]: hashTags },
-                            },
-                            attributes: ["tagId"],
-                            transaction,
-                        }); //bulkcreate를 한 후 수행하는게 효율적
-                        await Posts_Tags.bulkCreate(
-                            tagFind.map((tag) => {
-                                return { postId, tagId: tag.tagId };
-                            }),
-                            { transaction }
-                        );
-                        return res
-                            .status(200)
-                            .json({ message: "정상적으로 수정되었습니다" });
-                    }
-                });
-            } catch (err) {
-                console.log(err);
-                return res.status(400).json({
-                    message: "수정이 정상적으로 완료되지 않았습니다.",
-                });
+    router.route("/:postId").put(async (req,res,next)=>{
+        await authMiddleware(["userId"],req,res,next)
+    },async (req,res) => {
+        try{
+            const {postId} = req.params;
+            const {postTitle,postContent} = req.body;
+            const {userId} = res.locals.user;
+            const hashTags = postContent.match(/#[^\s#]*/g);
+            const post = await Posts.findByPk(Number(postId))
+            if(post.userId!==userId){
+                return res.status(412).json({message:"수정권한이 존재하지 않습니다"})
             }
+            if(isNaN(postId/1)){
+                return res.status(412).json({message:"잘못된 게시글 URL입니다"})
+            }
+            if(!postTitle||!postContent){
+                return res.status(412).json({message:"게시글 또는 제목이 입력되지 않았습니다"})
+            }
+            
+            if(!post){
+                return res.status(412).json({message:"게시글을 찾을 수 없습니다."})
+            }
+            db.sequelize.transaction(async (transaction)=>{
+                await post.update({postTitle,postContent},{transaction})
+                await Posts_Tags.destroy({ where:{postId}, transaction})
+                if(hashTags){ //db에 저장된 해시태그도, 수정된 해시태그도 없을때
+        
+                    const bulkHashTag = hashTags.map((tag)=>{
+                        return {tagContent:tag}
+                    })
+                    await HashTags.bulkCreate(bulkHashTag,{ignoreDuplicates:true,transaction})
+        
+                    const tagFind =await HashTags.findAll({ //db에 저장된 해시태그 불러오기
+                        where:{
+                            tagContent:
+                            {[Op.or]:hashTags}
+                        },
+                        attributes:["tagId"],
+                        transaction
+                    })//bulkcreate를 한 후 수행하는게 효율적
+                    await Posts_Tags.bulkCreate(tagFind.map(tag=>{
+                        return {postId,tagId:tag.tagId}
+                    }),{transaction})
+                    return res.status(200).json({message: "정상적으로 수정되었습니다"})
+                }
+            })
+
+        }catch(err){
+            console.log(err)
+            return res.status(400).json({message:"수정이 정상적으로 완료되지 않았습니다."})
         }
-    );
+
+    });
 module.exports = router;
+
