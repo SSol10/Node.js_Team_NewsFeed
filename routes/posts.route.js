@@ -5,11 +5,19 @@ const authMiddleware = require("../middleware/auth_middleware");
 const db = require("../models");
 const { Op } = require("sequelize");
 const memberchecker = require("../middleware/memberChecker");
+const {prepareDataForClient} = require("../controllers/posts.js")
+const {searchHashTag} = require("../controllers/hashTag.js")
 
 router
     .route("/")
     .get(memberchecker, async (req, res) => {
         const { userId } = res.locals.user;
+        pageSize = (req.query.pageSize ? req.query.pageSize : 10)/1;
+        pageNum = (req.query.pageNum ? req.query.pageNum : 1)/1;
+        if(isNaN(pageSize)||isNaN(pageNum)){
+            return res.status(412).json({message: "잘못된 페이지넘버입니다"})
+        }
+
         try {
             const posts = await Posts.findAll({
                 attributes: [
@@ -27,6 +35,8 @@ router
                 },
                 // order을 통해 데이터를 내림차순으로 정렬, 혹은 오름차순으로 정렬
                 order: [["userId", "desc"]],
+                limit:pageSize,
+                offset:(pageNum-1)*pageSize,
                 raw: true,
                 nest: true,
             });
@@ -36,46 +46,12 @@ router
                     message: "게시글 조회에 실패하셨습니다.",
                 });
             }
-
-            const postsData = await Promise.all(
-                posts.map(async (post) => {
-                    const likesCount = await Likes.count({
-                        where: {
-                            postId: Number(post.postId),
-                        },
-                    });
-
-                    let userHasClicked = null;
-                    if (userId) {
-                        userHasClicked = await Likes.findOne({
-                            where: {
-                                userId: Number(userId),
-                                postId: Number(post.postId),
-                            },
-                        });
-                    }
-
-                    if (userHasClicked) {
-                        userHasClicked = true;
-                    } else {
-                        userHasClicked = false;
-                    }
-
-                    return {
-                        postId: Number(post.postId),
-                        userId: post.userId,
-                        nickname: post.User.nickname,
-                        postTitle: post.postTitle,
-                        likesCount: likesCount,
-                        viewCount: post.viewCount,
-                        clicked: userHasClicked,
-                        createdAt: post.createdAt,
-                        updatedAt: post.updateAt,
-                    };
-                })
-            );
+            const postsData = await prepareDataForClient(userId,posts);
 
             return res.status(200).json({
+                pageNum,
+                pageSize,
+                contentNum:posts.length,
                 posts: postsData,
             });
         } catch (err) {
@@ -130,15 +106,14 @@ router
                     );
                     const postId = post.postId;
 
-                    const hashTags = await postContent.match(/#[^\s#]*/g); //#과 문자열로 이루어진 배열 반환
+                    const hashTags = await postContent.match(/#[^\s#]+/g); //#과 문자열로 이루어진 배열 반환
                     if (hashTags) {
                         const returnedHashTagArray = await HashTags.bulkCreate(
-                            await hashTags.map((hashTag) => {
+                            hashTags.map((hashTag) => {
                                 return { tagContent: hashTag };
                             }),
-                            { ignoreDuplicates: true, transaction }
+                            { ignoreDuplicates: true, transaction,raw:true,nest:true}
                         );
-                        console.log(returnedHashTagArray);
 
                         for (let index = 0; index < hashTags.length; index++) {
                             const tagIdFindNull =
@@ -158,9 +133,9 @@ router
                                 };
                             }
                         } //태그아이디를 hashTags에 저장하는 구문
-
+                        console.log(Posts_Tags)
                         const postsTags = await Posts_Tags.bulkCreate(
-                            await hashTags.map((tag) => {
+                            hashTags.map((tag) => {
                                 return { postId: postId, tagId: tag.tagId };
                             }),
                             { transaction }
@@ -177,13 +152,15 @@ router
                     });
                 });
             } catch (err) {
-                console.error(`POST /api/posts error message: ${err}`);
+                console.log(err)
+                // console.error(`POST /api/posts error message: ${err}`);
                 return res
                     .status(500)
                     .json({ message: "Internal Server Error" });
             }
         }
     );
+router.get("/hashTagSearch",memberchecker,searchHashTag)
 
 router
     .route("/:postId")
@@ -319,7 +296,7 @@ router.route("/:postId").put(
             const { postId } = req.params;
             const { postTitle, postContent } = req.body;
             const { userId } = res.locals.user;
-            const hashTags = postContent.match(/#[^\s#]*/g);
+            const hashTags = postContent.match(/#[^\s#]+/g);
             const post = await Posts.findByPk(Number(postId));
             if (post.userId !== userId) {
                 return res
@@ -346,7 +323,6 @@ router.route("/:postId").put(
                 await post.update({ postTitle, postContent }, { transaction });
                 await Posts_Tags.destroy({ where: { postId }, transaction });
                 if (hashTags) {
-                    //db에 저장된 해시태그도, 수정된 해시태그도 없을때
 
                     const bulkHashTag = hashTags.map((tag) => {
                         return { tagContent: tag };
@@ -357,7 +333,6 @@ router.route("/:postId").put(
                     });
 
                     const tagFind = await HashTags.findAll({
-                        //db에 저장된 해시태그 불러오기
                         where: {
                             tagContent: { [Op.or]: hashTags },
                         },

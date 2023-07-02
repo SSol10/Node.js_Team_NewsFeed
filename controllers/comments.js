@@ -1,6 +1,5 @@
 //댓글 생성삭제수정조회 기능구현
 const { Comments, Users } = require("../models");
-const Sequelize = require("sequelize");
 
 const createComment = async (req, res) => {
     const { commentContent } = req.body;
@@ -63,20 +62,12 @@ const getComment = async (req, res) => {
     }
 };
 
-    // 어떤 기능을 구현해야하는지 먼저 주석으로 처리하세요
-
-    // 게시글 수정기능을 작성
-    // 게시글 수정기능을 하려면
-    // 유저로부터 정보를 받아서 게시판의 게시글 수정을 해야한다.
-
-    // 유저로부터 받아올 정보 = title, content ,commentId ,userId
-    // 1.댓글을 db에서 어떻게 찾을지, + 게시글을 찾았다면, 어떻게 수정할지
 
 const modifyComment = async (req, res) => {
     try {
         const { commentId } = req.params;
         console.log(commentId);
-        const { commentContent } = req.body;
+        const { commentContent,postId } = req.body;
         const { userId } = res.locals.user;
 
         if (!commentContent) {
@@ -87,12 +78,13 @@ const modifyComment = async (req, res) => {
             { commentContent },
             {
                 where: {
+                    postId:Number(postId),
                     userId, //로그인한 유저와 정보가 일치하는지 확인
                     commentId,
                 },
             }
         );
-        if (!updateCommentCount) {
+        if (!updateCommentCount[0]) {
             return res
                 .status(404)
                 .json({ message: "댓글 수정 권한이 존재하지 않습니다" });
@@ -100,6 +92,7 @@ const modifyComment = async (req, res) => {
 
         return res.status(200).json({ message: "댓글을 수정하였습니다" });
     } catch (err) {
+        console.log(err)
         res.status(400).json({
             message: "댓글 수정이 정상적으로 처리되지 않았습니다",
         });
