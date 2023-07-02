@@ -10,7 +10,7 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
         if (!authToken || authType !== 'Bearer') {
             return res
                 .status(403)
-                .json({ message: '로그인이 필요한 기능입니다' });
+                .json({ errorMessage: '로그인이 필요한 기능입니다' });
         }
         const { email } = jwt.verify(authToken, tokenKey);
         const user = await Users.findOne({
@@ -23,7 +23,7 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
             // 쿠키를 지우기 때문에 로그인 한 유저가 권한이 없는 작업을 수행했을 경우 로그아웃이 되는 문제 발생
             return res
                 .status(403)
-                .json({ message: '로그인이 필요한 기능입니다' });
+                .json({ errorMessage: '로그인이 필요한 기능입니다' });
         }
         //리프레시토큰으로 인증기간이 맞는지 확인
         jwt.verify(user.refreshToken, tokenKey);
@@ -32,7 +32,7 @@ const authMiddleware = async (userFieldNamesArray, req, res, next) => {
     } catch (err) {
         console.log(err);
         res.clearCookie('Authorization');
-        return res.status(403).json({ message: '로그인에 실패하였습니다' });
+        return res.status(403).json({ errorMessage: '로그인에 실패하였습니다' });
     }
 };
 

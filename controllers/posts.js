@@ -10,7 +10,6 @@ const sequelize = new Sequelize("NewsFeed", "root", "4321aaaa", {
 const prepareDataForClient = async (userId, posts) => {
     preparedData = await Promise.all(
         posts.map(async (post) => {
-            // console.log(post)
             const likesCount = await Likes.count({
                 where: {
                     postId: Number(post.postId),

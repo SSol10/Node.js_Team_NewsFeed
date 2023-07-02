@@ -15,7 +15,7 @@ router
         pageSize = (req.query.pageSize ? req.query.pageSize : 10)/1;
         pageNum = (req.query.pageNum ? req.query.pageNum : 1)/1;
         if(isNaN(pageSize)||isNaN(pageNum)){
-            return res.status(412).json({message: "잘못된 페이지넘버입니다"})
+            return res.status(412).json({errorMessage: "잘못된 페이지넘버입니다"})
         }
 
         try {
@@ -34,7 +34,7 @@ router
                     attributes: ["nickname"],
                 },
                 // order을 통해 데이터를 내림차순으로 정렬, 혹은 오름차순으로 정렬
-                order: [["userId", "desc"]],
+                order: [["viewCount", "desc"]],
                 limit:pageSize,
                 offset:(pageNum-1)*pageSize,
                 raw: true,
@@ -43,7 +43,7 @@ router
 
             if (!posts.length) {
                 return res.status(404).json({
-                    message: "게시글 조회에 실패하셨습니다.",
+                    errorMessage: "게시글 조회에 실패하셨습니다.",
                 });
             }
             const postsData = await prepareDataForClient(userId,posts);
@@ -56,7 +56,7 @@ router
             });
         } catch (err) {
             console.error(`GET /api/posts error message: ${err}`);
-            return res.status(500).json({ message: "Internal Server Error" });
+            return res.status(400).json({ errorMessage: "게시글 조회에 실패하였습니다" });
         }
     })
     .post(
@@ -78,7 +78,7 @@ router
             if (!postTitle || !postContent) {
                 return res
                     .status(412)
-                    .json({ message: "데이터 형식이 올바르지 않습니다." });
+                    .json({ errorMessage: "데이터 형식이 올바르지 않습니다." });
             }
 
             if (postTitle.trim() === "") {
@@ -88,7 +88,7 @@ router
             }
             if (postContent.trim() === "") {
                 return res.status(412).json({
-                    message: "게시글 내용의 형식이 일치하지 않습니다.",
+                    errorMessage: "게시글 내용의 형식이 일치하지 않습니다.",
                 });
             }
 
@@ -133,7 +133,6 @@ router
                                 };
                             }
                         } //태그아이디를 hashTags에 저장하는 구문
-                        console.log(Posts_Tags)
                         const postsTags = await Posts_Tags.bulkCreate(
                             hashTags.map((tag) => {
                                 return { postId: postId, tagId: tag.tagId };
@@ -155,8 +154,8 @@ router
                 console.log(err)
                 // console.error(`POST /api/posts error message: ${err}`);
                 return res
-                    .status(500)
-                    .json({ message: "Internal Server Error" });
+                    .status(400)
+                    .json({ errorMessage: "게시글 수정에 실패하였습니다" });
             }
         }
     );
@@ -171,7 +170,7 @@ router
         if (!postId) {
             return res
                 .status(400)
-                .json({ message: "데이터 형식이 올바르지 않습니다." });
+                .json({ errorMessage: "데이터 형식이 올바르지 않습니다." });
         }
         try {
             //
@@ -184,10 +183,7 @@ router
                 nest: true,
             });
             if (result) {
-                // 게시글을 조회하면 조회수 증가
-                // Promise 반환해서 순서가 안지켜지는 문제가 있고 response 할 때 1을 더해서 반환하도록 처리했음
-                // 1을 더하지 않아도 되는 방법은 무엇이 있을지 생각해보기
-                // 추가 사항: update 말고 이렇게 해도 될 것 같음, await Posts.increment({ viewCount: 1}, { where: { postId: Number(id) }})
+
                 await Posts.update(
                     { viewCount: Number(result.viewCount) + 1 },
                     {
@@ -196,12 +192,7 @@ router
                         },
                     }
                 );
-                // await Likes.count() 이 방법도 있음
-                // const { count, rows } = await Likes.findAndCountAll({
-                //     where: {
-                //         postId: Number(postId),
-                //     },
-                // });
+
                 const likesCount = await Likes.count({
                     where: {
                         postId: Number(postId),
@@ -238,11 +229,11 @@ router
             } else {
                 return res
                     .status(400)
-                    .json({ message: "게시글 조회에 실패하였습니다." });
+                    .json({ errorMessage: "게시글 조회에 실패하였습니다." });
             }
         } catch (err) {
             console.error(`GET /api/posts/:id Error Message: ${err}`);
-            return res.status(500).json({ message: "Internal Server Error" });
+            return res.status(400).json({ errorMessage: "게시글 조회에 실패하였습니다" });
         }
     })
     .delete(
@@ -256,7 +247,7 @@ router
 
             if (!postId) {
                 res.status(400).json({
-                    message: "데이터 형식이 올바르지 않습니다.",
+                    errorMessage: "데이터 형식이 올바르지 않습니다.",
                 });
             } else {
                 try {
@@ -281,8 +272,8 @@ router
                         `DELETE /api/posts/:id Error Message: ${err}`
                     );
                     return res
-                        .status(500)
-                        .json({ message: "Internal Server Error" });
+                        .status(400)
+                        .json({ errorMessage: "게시글 삭제에 실패하였습니다" });
                 }
             }
         }
@@ -301,23 +292,23 @@ router.route("/:postId").put(
             if (post.userId !== userId) {
                 return res
                     .status(412)
-                    .json({ message: "수정권한이 존재하지 않습니다" });
+                    .json({ errorMessage: "수정권한이 존재하지 않습니다" });
             }
             if (isNaN(postId / 1)) {
                 return res
                     .status(412)
-                    .json({ message: "잘못된 게시글 URL입니다" });
+                    .json({ errorMessage: "잘못된 게시글 URL입니다" });
             }
             if (!postTitle || !postContent) {
                 return res.status(412).json({
-                    message: "게시글 또는 제목이 입력되지 않았습니다",
+                    errorMessage: "게시글 또는 제목이 입력되지 않았습니다",
                 });
             }
 
             if (!post) {
                 return res
                     .status(412)
-                    .json({ message: "게시글을 찾을 수 없습니다." });
+                    .json({ errorMessage: "게시글을 찾을 수 없습니다." });
             }
             db.sequelize.transaction(async (transaction) => {
                 await post.update({ postTitle, postContent }, { transaction });
@@ -354,7 +345,7 @@ router.route("/:postId").put(
             console.log(err);
             return res
                 .status(400)
-                .json({ message: "수정이 정상적으로 완료되지 않았습니다." });
+                .json({ errorMessage: "게시글 수정에 실패하였습니다" });
         }
     }
 );

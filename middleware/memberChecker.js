@@ -4,12 +4,10 @@ const {Users} = require("../models")
 
 module.exports = async (req, res, next) => {
     try {
-        console.log("isMemberTest!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         const { Authorization } = req.cookies;
         const [authType, authToken] = (Authorization ?? "").split(" ");
         if (!authToken || authType !== "Bearer") {
             res.locals.user = { userId: null };
-            console.log(res.locals.user)
             return next();
         }
         const { email } = jwt.verify(authToken, tokenKey);
@@ -23,7 +21,6 @@ module.exports = async (req, res, next) => {
             res.locals.user = { userId: null };
             return next();
         }
-        console.log(user);
         //리프레시토큰으로 인증기간이 맞는지 확인
         jwt.verify(user.refreshToken, tokenKey);
         res.locals.user = user;
