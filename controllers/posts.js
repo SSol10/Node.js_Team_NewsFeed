@@ -65,9 +65,10 @@ async function getPostsByHashTag(hashTag, limit, offset) {
         INNER JOIN Posts AS p ON p.postId = \`Posts->Posts_Tags\`.postId) ON h.tagId = \`Posts->Posts_Tags\`.tagId
         LEFT OUTER JOIN Users AS \`Posts->User\` ON p.userId = \`Posts->User\`.userId
         WHERE h.tagContent = :hashTag
+        ORDER BY p.viewCount DESC
         LIMIT :limit OFFSET :offset
       `;
-      
+
         const results = await sequelize.query(sqlQuery, {
             replacements: {
                 hashTag,
