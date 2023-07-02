@@ -1,10 +1,10 @@
+
 const express = require("express");
 const router = express.Router();
 const { Likes,Posts } = require("../models");
 const { Op } = require("sequelize");
 const authMiddleware = require("../middleware/auth_middleware");
 
-// router.use(authMiddleware);
 
 router
     .route("/:postId")
@@ -16,14 +16,11 @@ router
             const { postId } = req.params;
             // const { userId } = req.body; // 이 부분은 사용자 인증이 추가되면 res.locals.user를 이용해야 함
             const { userId } = res.locals.user;
-            
-
             if (!userId) {
                 return res.status(403).json({
                     errorMessage: "Permission denied",
                 });
             }
-
             try {
                 const post = await Posts.findOne({
                     where:{postId}
@@ -40,7 +37,6 @@ router
                         ],
                     },
                 });
-
                 // 좋아요를 누른 적 있는 사람이 다시 누르면 비정상적인 접근으로 판단
                 if (userHasClicked) {
                     return res
@@ -66,11 +62,9 @@ router
                     },
                 });
             } catch (err) {
-                // console.log(err)
-                // console.error(`GET /api/posts Error Message: ${err}`);
                 return res
                     .status(500)
-                    .json({ message: "Internal Server Error" });
+                    .json({ errorMessage: "Internal Server Error" });
             }
         }
     )

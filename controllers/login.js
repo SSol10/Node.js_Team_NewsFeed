@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
       //패스워드가 존재하지 않는경우 즉, email이 유효하지 않은경우
       return res
         .status(412)
-        .json({ message: "이메일 또는 패스워드를 확인해주세요" });
+        .json({ errorMessage: "이메일 또는 패스워드를 확인해주세요" });
     } else {
       //패스워드가 존재하는경우 즉, email이 유효한경우
       //입력받은 패스워드와 비교
@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
         //bcrypt로 비교한 암호가 다른경우
         return res
           .status(412)
-          .json({ message: "이메일 또는 패스워드를 확인해주세요" });
+          .json({ errorMessage: "이메일 또는 패스워드를 확인해주세요" });
       }
       const accessToken = jwt.sign({ email }, tokenKey, {
         expiresIn: accessTokenExpiresIn,
@@ -34,14 +34,14 @@ module.exports = async (req, res) => {
         expiresIn: refreshTokenExpiresIn,
       });
       user.refreshToken = refreshToken;
-      console.log(refreshToken)
+      
       await user.save();
       res.cookie("Authorization", `Bearer ${accessToken}`);
       return res.status(200).json({ message: "로그인에 성공하였습니다" });
     }
   } catch (err) {
     console.log(err)
-    res.status(412).json({ message: "로그인에 실패하였습니다" });
+    res.status(412).json({ errorMessage: "로그인에 실패하였습니다" });
   }
 };
 
