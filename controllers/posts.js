@@ -3,7 +3,7 @@ const { Likes } = require("../models");
 const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize("NewsFeed", "root", "4321aaaa", {
-    host: "express-database.c6fzjazd8zwu.ap-northeast-2.rds.amazonaws.com",
+    host: "호스트정보",
     dialect: "mysql",
 });
 

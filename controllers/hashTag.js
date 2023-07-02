@@ -17,7 +17,7 @@ const searchHashTag = async (req, res) => {
         if (!isHashTagValid) {
             return res.status(412).json({ errorMessage: "잘못된 해시태그입니다" });
         }
-        const hashTagAndPosts=await getPostsByHashTag (hashTag,pageSize,(pageNum-1)*pageSize)
+        const hashTagAndPosts=await getPostsByHashTag (hashTag,pageSize,(pageNum-1)*pageSize);
 
         if (!hashTagAndPosts) {
             return res

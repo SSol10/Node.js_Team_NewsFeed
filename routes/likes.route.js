@@ -26,7 +26,7 @@ router
                     where:{postId}
                 })
                 if(!post){
-                    return res.status(401).json({errorMessage:"해당 게시글이 존재하지 않습니다"})
+                    return res.status(401).json({errorMessage:"해당 게시글이 존재하지 않습니다"});
                 }
                 // 유저가 좋아요 버튼 누른 적 있는지 확인
                 const userHasClicked = await Likes.findOne({
