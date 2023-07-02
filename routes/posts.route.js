@@ -106,7 +106,7 @@ router
                     );
                     const postId = post.postId;
 
-                    const hashTags = await postContent.match(/#[^\s#]+/g); //#과 문자열로 이루어진 배열 반환
+                    const hashTags = await postContent.match(/#[\dA-Za-zㄱ-ㅎㅏ-ㅣ가-힣]{1,18}/g); //#과 문자열로 이루어진 배열 반환
                     if (hashTags) {
                         const returnedHashTagArray = await HashTags.bulkCreate(
                             hashTags.map((hashTag) => {
@@ -287,19 +287,19 @@ router.route("/:postId").put(
             const { postId } = req.params;
             const { postTitle, postContent } = req.body;
             const { userId } = res.locals.user;
-            const hashTags = postContent.match(/#[^\s#]+/g);
+            const hashTags = postContent.match(/#[\dA-Za-zㄱ-ㅎㅏ-ㅣ가-힣]{1,18}/g);
             const post = await Posts.findByPk(Number(postId));
             if (post.userId !== userId) {
                 return res
                     .status(412)
                     .json({ errorMessage: "수정권한이 존재하지 않습니다" });
             }
-            if (isNaN(postId / 1)) {
+            else if (isNaN(postId / 1)) {
                 return res
                     .status(412)
                     .json({ errorMessage: "잘못된 게시글 URL입니다" });
             }
-            if (!postTitle || !postContent) {
+            else if (!postTitle || !postContent) {
                 return res.status(412).json({
                     errorMessage: "게시글 또는 제목이 입력되지 않았습니다",
                 });
@@ -336,10 +336,10 @@ router.route("/:postId").put(
                         }),
                         { transaction }
                     );
-                    return res
-                        .status(200)
-                        .json({ message: "정상적으로 수정되었습니다" });
                 }
+                return res
+                .status(200)
+                .json({ message: "정상적으로 수정되었습니다" });
             });
         } catch (err) {
             console.log(err);

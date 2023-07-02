@@ -18,11 +18,10 @@ module.exports = async (req, res) => {
         .status(412)
         .json({ errorMessage: "이메일 또는 패스워드를 확인해주세요" });
     } else {
-      //패스워드가 존재하는경우 즉, email이 유효한경우
-      //입력받은 패스워드와 비교
+
       const isValidPassword = bcrypt.compareSync(password, user.password);
       if (!isValidPassword) {
-        //bcrypt로 비교한 암호가 다른경우
+
         return res
           .status(412)
           .json({ errorMessage: "이메일 또는 패스워드를 확인해주세요" });
