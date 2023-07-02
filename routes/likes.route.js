@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Likes } = require("../models");
+const { Likes,Posts } = require("../models");
 const { Op } = require("sequelize");
 const authMiddleware = require("../middleware/auth_middleware");
 
@@ -16,7 +16,7 @@ router
             const { postId } = req.params;
             // const { userId } = req.body; // 이 부분은 사용자 인증이 추가되면 res.locals.user를 이용해야 함
             const { userId } = res.locals.user;
-            console.log(userId);
+            
 
             if (!userId) {
                 return res.status(403).json({
@@ -25,6 +25,12 @@ router
             }
 
             try {
+                const post = await Posts.findOne({
+                    where:{postId}
+                })
+                if(!post){
+                    return res.status(401).json({errorMessage:"해당 게시글이 존재하지 않습니다"})
+                }
                 // 유저가 좋아요 버튼 누른 적 있는지 확인
                 const userHasClicked = await Likes.findOne({
                     where: {
@@ -60,7 +66,8 @@ router
                     },
                 });
             } catch (err) {
-                console.error(`GET /api/posts Error Message: ${err}`);
+                // console.log(err)
+                // console.error(`GET /api/posts Error Message: ${err}`);
                 return res
                     .status(500)
                     .json({ message: "Internal Server Error" });

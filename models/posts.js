@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey:'postId',
         foreignKey:'postId'
       })
-      this.belongsToMany(models.HashTags,{through:models.Posts_Tags})
+      this.belongsToMany(models.HashTags,{through:"Posts_Tags",foreignKey:"postId",otherKey:"tagId"})
     }
   }
   Posts.init(
