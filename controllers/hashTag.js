@@ -28,7 +28,6 @@ const searchHashTag = async (req, res) => {
             return post.Posts;
         })
 
-
         const postsData = await prepareDataForClient(userId,posts);
         return res.status(200).json({
             hashTag,
