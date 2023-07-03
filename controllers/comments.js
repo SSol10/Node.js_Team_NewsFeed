@@ -64,8 +64,8 @@ const getComment = async (req, res) => {
 
 const modifyComment = async (req, res) => {
     try {
-        const { commentId } = req.params;
-        const { commentContent,postId } = req.body;
+        const { commentId,postId } = req.params;
+        const { commentContent } = req.body;
         const { userId } = res.locals.user;
 
         if (!commentContent) {

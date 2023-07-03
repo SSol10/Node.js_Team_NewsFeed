@@ -26,7 +26,7 @@ router
                     where:{postId}
                 })
                 if(!post){
-                    return res.status(401).json({errorMessage:"해당 게시글이 존재하지 않습니다"})
+                    return res.status(401).json({errorMessage:"해당 게시글이 존재하지 않습니다"});
                 }
                 // 유저가 좋아요 버튼 누른 적 있는지 확인
                 const userHasClicked = await Likes.findOne({
@@ -43,12 +43,11 @@ router
                         .status(401)
                         .json({ errorMessage: "비정상적인 접근입니다." });
                 }
-                // 인증 미들웨어에서 사용자에 대한 파악을 하지만 여기서 한 번 더 사용자에 대한 확인을 하는 것이 좋을까?
+
                 await Likes.create({
                     userId: Number(userId),
                     postId: Number(postId),
                 });
-                // 포스트에 의존적이니 포스트가 있는지 없는지 확인하는 작업은 필요 없겠지?
                 const likesCount = await Likes.count({
                     where: {
                         postId: Number(postId),

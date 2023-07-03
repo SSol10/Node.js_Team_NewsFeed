@@ -93,49 +93,38 @@ router
             }
 
             try {
-                //포스트아이디 생성 후
                 await db.sequelize.transaction(async (transaction) => {
                     const post = await Posts.create(
                         {
                             userId: Number(userId),
                             postTitle,
                             postContent,
-                            // hashtag 어떻게 넣을지 확인
                         },
                         { transaction }
                     );
                     const postId = post.postId;
 
-                    const hashTags = await postContent.match(/#[\dA-Za-zㄱ-ㅎㅏ-ㅣ가-힣]{1,18}/g); //#과 문자열로 이루어진 배열 반환
+                    const hashTags = await postContent.match(/#[^\s#]+/g); 
                     if (hashTags) {
                         const returnedHashTagArray = await HashTags.bulkCreate(
                             hashTags.map((hashTag) => {
                                 return { tagContent: hashTag };
                             }),
-                            { ignoreDuplicates: true, transaction,raw:true,nest:true}
-                        );
+                            { ignoreDuplicates: true, transaction}
+                        ).then(()=>{
+                            return HashTags.findAll()
+                        }).then((hashTags)=>{
+                            return hashTags
+                        })
 
                         for (let index = 0; index < hashTags.length; index++) {
-                            const tagIdFindNull =
-                                returnedHashTagArray[index].tagId;
-                            if (tagIdFindNull === null) {
-                                const hashTag = hashTags[index];
-                                const tagForFind = await HashTags.findOne({
-                                    where: { tagContent: hashTag },
-                                    attributes: ["tagId"],
-                                    transaction,
-                                });
-                                const tagIdForFind = tagForFind.tagId;
-                                hashTags[index] = { tagId: tagIdForFind };
-                            } else {
                                 hashTags[index] = {
                                     tagId: returnedHashTagArray[index].tagId,
                                 };
-                            }
-                        } //태그아이디를 hashTags에 저장하는 구문
+                        } 
                         const postsTags = await Posts_Tags.bulkCreate(
                             hashTags.map((tag) => {
-                                return { postId: postId, tagId: tag.tagId };
+                                return { postId, tagId: tag.tagId };
                             }),
                             { transaction }
                         );
@@ -155,7 +144,7 @@ router
                 // console.error(`POST /api/posts error message: ${err}`);
                 return res
                     .status(400)
-                    .json({ errorMessage: "게시글 수정에 실패하였습니다" });
+                    .json({ errorMessage: "게시글 생성에 실패하였습니다" });
             }
         }
     );
@@ -268,9 +257,10 @@ router
                         .status(200)
                         .json({ message: "게시글을 삭제하였습니다." });
                 } catch (err) {
-                    console.error(
-                        `DELETE /api/posts/:id Error Message: ${err}`
-                    );
+                    // console.log(err)
+                    // console.error(
+                    //     `DELETE /api/posts/:id Error Message: ${err}`
+                    // );
                     return res
                         .status(400)
                         .json({ errorMessage: "게시글 삭제에 실패하였습니다" });
