@@ -100,16 +100,13 @@ router
 
                     const hashTags = await postContent.match(/#[^\s#]+/g); 
                     if (hashTags) {
-                        const returnedHashTagArray = await HashTags.bulkCreate(
+                        await HashTags.bulkCreate(
                             hashTags.map((hashTag) => {
                                 return { tagContent: hashTag };
                             }),
-                            { ignoreDuplicates: true, transaction}
-                        ).then(()=>{
-                            return HashTags.findAll()
-                        }).then((hashTags)=>{
-                            return hashTags
-                        })
+                            { ignoreDuplicates: true, transaction },
+                        )
+                        const returnedHashTagArray = await HashTags.findAll()
 
                         for (let index = 0; index < hashTags.length; index++) {
                                 hashTags[index] = {
