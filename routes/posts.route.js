@@ -12,8 +12,8 @@ router
     .route("/")
     .get(memberchecker, async (req, res) => {
         const { userId } = res.locals.user;
-        pageSize = (req.query.pageSize ? req.query.pageSize : 10)/1;
-        pageNum = (req.query.pageNum ? req.query.pageNum : 1)/1;
+        const pageSize = (req.query.pageSize ? req.query.pageSize : 10)/1;
+        const pageNum = (req.query.pageNum ? req.query.pageNum : 1)/1;
         if(isNaN(pageSize)||isNaN(pageNum)){
             return res.status(412).json({errorMessage: "잘못된 페이지넘버입니다"})
         }
