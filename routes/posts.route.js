@@ -68,13 +68,7 @@ router
             const { postTitle, postContent } = req.body;
             const { userId } = res.locals.user;
 
-            const parseHashtag = (hashtag) => {
-                if (!hashtag) {
-                    return;
-                }
-                return hashtag.trim().split(",");
-            };
-
+           
             if (!postTitle || !postContent) {
                 return res
                     .status(412)
