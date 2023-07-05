@@ -191,8 +191,8 @@ router
                     });
                 }
 
-                if (!userHasClicked) userHasClicked = false;
-                else userHasClicked = true;
+                if (!userHasClicked) { userHasClicked = false; }
+                else { userHasClicked = true; }
 
                 return res.status(200).json({
                     result: {
