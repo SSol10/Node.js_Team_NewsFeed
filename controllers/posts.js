@@ -1,11 +1,9 @@
 const { Likes } = require("../models");
+const db = require("../models")
 
 const { Sequelize } = require("sequelize");
+const sequelize = db.sequelize
 
-const sequelize = new Sequelize("NewsFeed", "root", "4321aaaa", {
-    host: "호스트",
-    dialect: "mysql",
-});
 
 const prepareDataForClient = async (userId, posts) => {
     preparedData = await Promise.all(
